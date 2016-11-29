@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>TODO supply a title:wq
+        </title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div id="outer" style='background-color:#99ffff; height: 460px;width:26%;float:left'>
+    <div id="main" style="width:100%;background-color: #ff3366 ">
+        <input type="button" id="btAdd" value="Add address" class="bt" />
+        <input type="button" id="btRemove" value="Remove addr" class="bt" />
+        <input type="button" id="btRemoveAll" value="Remove All" class="bt" />
+        <input type="button" id="btSubmit" value="Submit" class="bt" onclick="getLocationsfromText();" /><br />
+    </div>
+    </div>     
+    <div id="content" style="margin-left:26%;background-color: #99ff99;height:460px">
+        <div id="map-canvas" style="width:660px; height:460px; background-color: #3333ff;float:left"></div>
+        
+        <div id="stats" style="float:left;overflow:hidden;width:250px; height: 450px;background-color: #ff66ff">
+           
+        </div>
+        
+        
+        <!--div class="hr vpad"></div-->
+        
+        
+    </div>
+    <div id='footer' style='float:left;background-color: #330033;height: 150px;width:100%'>
+        
+        <table style="background-color: #ff3366; margin-left: 500px;width: 25%">
+                    <tr>
+                        <td colspan="2"><b>Configuration</b></td>
+                    </tr>
+                    <tr>
+                        <td>Travel Mode: </td>
+                        <td>
+                            <select id="travel-type" style="width:100%">
+                                <option value="DRIVING">Car</option>
+                                <option value="BICYCLING">Bicycle</option>
+                                <option value="WALKING">Walking</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Avoid Highways: </td>
+                        <td>
+                            <select id="avoid-highways" style="width:100%">
+                                <option value="1">Enabled</option>
+                                <option value="0" selected="selected">Disabled</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Destinations Count: </td>
+                        <td id="destinations-count">0</td>
+                    </tr>
+                    <tr class="ga-info" style="display:none;">
+                        <td>Generations: </td><td id="generations-passed">0</td>
+                    </tr>
+                    <tr class="ga-info" style="display:none;">
+                        <td>Best Time: </td><td id="best-time">?</td>
+                    </tr>
+                    <tr id="ga-buttons">
+                        <td colspan="2"><button id="find-route" onclick="getDurations();" style="width:100%;background-color: #ff9933">Calculate Best Route</button> <button id="clear-map" style="width:100%" onclick="clearmap();">Clear</button></td>
+                    </tr>
+                </table>
+    </div>
+    </body>
+</html>
+
+
