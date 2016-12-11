@@ -337,7 +337,7 @@ $(document).ready(function() {
 	   }
 	   document.getElementById('results').innerHTML +='<br>';
            document.getElementById('results').innerHTML +='Distance:' + distsum/1000 + 'Km'+'<br>';
-           document.getElementById('results').innerHTML +='Duration:' + json[1]["totaltime"]/3600 + 'hours'+'<br>';
+           document.getElementById('results').innerHTML +='Duration:' + (json[1]["totaltime"]/3600).toFixed(2) + 'hours'+'<br>';
            alert(result);
             },
          failure: function(result){

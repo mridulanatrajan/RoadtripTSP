@@ -15,18 +15,26 @@ def tsp(request):
 
 @csrf_exempt
 def trip(request):
+    d2=[]
     out = json.loads(request.body.decode('utf-8'))
     durations = []
     for i in range(0,len(out)):
         durations.append(out[i]["city"+str(i)])
     durm = np.asarray(durations)
     d,totaltime=simulated(durm)  #call to simulated annealing algorithm
+    for i in d:     #converting the list of lists obtained to a tupple
+	print("inside for")
+	d2.append(tuple(i))
+    
     d1,totaltime1=constraints(durm) #call to subtour elimination
-    flat = ordering(d,durm)
-    print(d,d1)
-    print(totaltime,totaltime1)
-    flat1=ordering(d1,durm)
-    print(flat,flat1)
+    flat = ordering(d2,durm)
+    flat1 = ordering(d1,durm)
+    print("time taken to complete the tour when simulated annealing is used:",totaltime)
+    print("time taken to complete the tour when subtout elimination is used:",totaltime1)  
+    print("tour obtained when simulated annealing is used",flat)
+    print("tour obtained when subtour elmination is used",flat1)
+    
+    #based on totaltime obtained, send the result to the server as a json object
     if totaltime1<totaltime:
         jslist = json.dumps([{"path":flat1},{"totaltime":totaltime1}])
     elif totaltime1>totaltime:
@@ -84,29 +92,6 @@ def swap(route,row):
         
     return route
 
-'''
-def simulated(durm):
-   row,col=durm.shape
-   path=initialsolution(row)
-   cost=objective(path,durm)
-   T=0.27
-   Tmin=0.0001
-   alpha=0.9
-   while T>Tmin:
-       newpath=swap(path,row)
-       newcost=objective(newpath,durm)
-       deltaE=cost-newcost
-       if deltaE<0:
-           cost=newcost
-           path=newpath
-       elif random.random() < math.exp(-deltaE/T):
-           cost=newcost
-           path=newpath
-       
-       T=T*alpha
-       
-   return path,cost
-'''
 
 def simulated(durm):
    row,col=durm.shape
@@ -114,7 +99,7 @@ def simulated(durm):
    cost=objective(path,durm)
    T=0.27
    Tmin=0.0001
-   alpha=0.9
+   alpha=0.99
    while T>Tmin:
        newpath=swap(path,row)
        newcost=objective(newpath,durm)
@@ -130,13 +115,17 @@ def simulated(durm):
        
    return path,cost
 
-
 def ordering(path,durm):
-    reorder=[path[0][0],path[0][1]]
-    while(len(reorder)!=len(durm)+1):
+    n=durm.shape[0]
+    for p in path:
+        if p[0]==0:
+ 	    reorder=[p[0],p[1]]
+    while len(reorder)< n+1:
         for b in path:
             if reorder[-1]==b[0]:
                 reorder.extend([b[1]])
+		break
+		
             
     return reorder
 
@@ -145,15 +134,18 @@ def ordering(path,durm):
 
 
 def constraints(durm):
-    #descision variables
+    
     path=[]
     distance=0
     
+    #initialize the model
     m=Model()
     row,col=durm.shape
 
+    #descision variables
     vars=m.addVars(row,col,vtype=GRB.BINARY)
 
+    #objective function
     obj=LinExpr()
     for i in range(row):
         for j in range(col):
@@ -185,7 +177,7 @@ def constraints(durm):
         m.addConstr(leav,GRB.EQUAL,1)
 
 
-    #do not count the same node to the same node as an edge
+    #do not count the same node to the same node as an edge (example i,j=1,1)
     for i,j in zip(range(row),range(col)):
         same=LinExpr()
         same=vars[i,j]
@@ -195,18 +187,20 @@ def constraints(durm):
     def solveTSP():
 
         edgelist=[]
-
+	
+	#optimise the model and get the value of the descision variables
         m.optimize()
         sol=m.getAttr('x',vars)
 
         for edges, presense in sol.iteritems():
             if presense == 1:
                 edgelist.append(edges)
-         
+        
+	#pass the tour obtained to the subtour function to extract subcycles
         tour=[edgelist[0]]
         stour,nodes=subtour(edgelist,tour,edgelist[0],[],[])
 
-
+	#if the length of the tour extracted is less than the total number of nodes then add the subtout elmination constraint
         if len(stour)==len(set(nodes)) and len(stour)<row:
             cycle=LinExpr()
             for e in stour:
@@ -220,7 +214,7 @@ def constraints(durm):
         
 
 
-    #determine if there is a subtour and add constraints appropriately
+    #extract subcycles from the tour
     def subtour(edgelist,tour,selected,nodesvisited,edge):
         nodesvisited.append(selected[0])
         for i in edgelist:
@@ -234,5 +228,5 @@ def constraints(durm):
         return tour,edge
     
     return solveTSP()
-    #print("blah blah",path,distance)
+    
 
